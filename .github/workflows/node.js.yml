@@ -71,7 +71,7 @@ jobs:
       - name: deploy via Code deploy
         run: |
           aws deploy create-deployment \
-            --application-name acebook-application \
+            --application-name abdullah-acebook \
             --deployment-group-name production \
             --s3-location bucket=abdullah-acebook-s3,bundleType=zip,key=acebook-app.zip
 
