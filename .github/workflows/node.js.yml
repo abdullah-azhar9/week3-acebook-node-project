@@ -1,6 +1,6 @@
 # This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
-name: Node.js CI
+name: Node.js CI and Deploy
 
 on:
   push:
@@ -17,14 +17,14 @@ jobs:
         image: mongo:8.0
         ports:
           - 27017:27017
-        options: --bind_ip_all
 
     strategy:
       matrix:
         node-version: [18.x, 20.x, 22.x]
 
     steps:
-      - uses: actions/checkout@v4
+      - name: checkout
+        uses: actions/checkout@v4
 
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
@@ -32,12 +32,45 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
 
-      - run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-      - run: npm run build --if-present
+      - name: build app
+        run: npm run build --if-present
       
       - name: Start test server
         run: npm run start:test &
         
       - name: Run tests
         run: npm test
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: zip app
+        run: zip -r acebook-app.zip .
+
+      - name: configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-2
+
+      - name: upload to S3
+        run: aws s3 cp acebook-app.zip s3://abdullah-acebook-s3/acebook-app.zip
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: deploy via Code deploy
+        run: aws deploy create-deployment \
+            --application-name acebook-application \
+            --deployment-group-name production \
+            --s3-location bucket=abdullah-acebook-s3,bundleType=zip,key=acebook-app.zip
+
