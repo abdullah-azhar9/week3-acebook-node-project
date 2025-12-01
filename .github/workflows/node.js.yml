@@ -69,7 +69,8 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
       - name: deploy via Code deploy
-        run: aws deploy create-deployment \
+        run: |
+          aws deploy create-deployment \
             --application-name acebook-application \
             --deployment-group-name production \
             --s3-location bucket=abdullah-acebook-s3,bundleType=zip,key=acebook-app.zip
