@@ -40,7 +40,7 @@ REPLACE THIS TEXT WITH A LINK TO YOUR CARD WALL
    ```
    npm install
    ```
-5. Install an ESLint plugin for your editor. For example: [linter-eslint](https://github.com/AtomLinter/linter-eslint) for Atom.
+5. Install an ESLint plugin for your editor. For example: [linter-eslint](https://github.com/AtomLinter/lintapm install linter-eslinter-eslint) for Atom.
 6. Install MongoDB
    ```
    brew tap mongodb/brew
